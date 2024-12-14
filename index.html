@@ -100,14 +100,16 @@
             console.log(items)
 
 
-            if (items.length <= 1) {
+            if (items.length == 0) {
                 return
             }
-            if (items[1].type.indexOf("image") !== -1) {
-                const file = items[1].getAsFile();
 
-
-                await recognize(file);
+            for (var i = 0; i < items.length; i++) {
+                if (items[i].type.indexOf("image") !== -1) {
+                    const file = items[i].getAsFile();
+                    await recognize(file);
+                    break
+                }
             }
         }
 
