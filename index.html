@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -12,7 +13,7 @@
 
 <body>
     <div class="container-fluid">
-        <div>
+        <div style="margin-top: 10px">
             <img id="imagePreview" src="" alt="Image Preview" style="max-height: 50%; max-width: 100%; display: none;">
         </div>
         <div style="margin: 10px">
@@ -29,31 +30,57 @@
         var div = document.getElementById("text");
 
 
-        const recognize = async function (addEventListener) {
+        async function recognize(file) {
+            console.log(file)
+            const ret = await worker.recognize(file);
+            console.log({ "text": ret.data.text });
+            div.innerHTML += `<b>Caption:</b><br>` + ret.data.text.replaceAll("\n", "<br>") + "<br><br>";
+        }
+
+
+        async function handleUpload(e) {
             const files = event.target.files;
-
-            if (event.target.files && event.target.files[0]) {
-                const reader = new FileReader();
-
-                reader.onload = function (e) {
-                    imagePreview.src = e.target.result;
-                    imagePreview.style.display = 'block';
-                };
-
-                reader.readAsDataURL(event.target.files[0]);
+            if (files.length == 0) {
+                return
             }
+            displayImage(files[0])
+            await recognize(files[0])
+        }
 
-            console.log(files)
+        var imagePreview = document.getElementById('imagePreview');
 
-            for (let i = 0; i < files.length; i++) {
-                const ret = await worker.recognize(files[i]);
-                console.log({ "text": ret.data.text });
 
-                div.innerHTML += `<b>Image ${i}</b><br>` + ret.data.text.replaceAll("\n", "<br>") + "<br><br>";
+        function displayImage(file) {
+            console.log("Display:", file)
+
+            const reader = new FileReader();
+            reader.onload = function (e) {
+                imagePreview.src = e.target.result;
+                imagePreview.style.display = 'block';
+            }
+            reader.readAsDataURL(file);
+        }
+
+        const uploader = document.getElementById('uploader');
+        uploader.addEventListener('change', handleUpload);
+
+
+        async function handlePaste(e) {
+            const items = e.clipboardData.items;
+            if (items.length <= 1) {
+                return
+            }
+            console.log(items[1])
+            if (items[1].type.indexOf("image") !== -1) {
+                const file = items[1].getAsFile();
+
+
+                displayImage(file);
+                await recognize(file);
             }
         }
-        const elm = document.getElementById('uploader');
-        elm.addEventListener('change', recognize);
+        document.addEventListener('paste', handlePaste, false);
+
     </script>
 </body>
 
