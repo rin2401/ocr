@@ -16,7 +16,8 @@
         <div style="margin-top: 10px">
             <img id="imagePreview" src="" alt="Image Preview" style="max-height: 50%; max-width: 100%; display: none;">
         </div>
-        <div style="margin: 10px">
+        <div style="margin-top: 10px;" class="input-group">
+            <button id="pasteBtn"  class="btn btn-warning" type="button" >Paste</button>
             <input type="file" id="uploader" class="form-control" multiple>
         </div>
         <div>
@@ -66,11 +67,13 @@
 
 
         async function handlePaste(e) {
-            const items = e.clipboardData.items;
+            var items = e.clipboardData.items;
+            console.log(items)
+
+
             if (items.length <= 1) {
                 return
             }
-            console.log(items[1])
             if (items[1].type.indexOf("image") !== -1) {
                 const file = items[1].getAsFile();
 
@@ -79,7 +82,25 @@
                 await recognize(file);
             }
         }
+
+
+        async function handlePasteButton(e) {
+            const items = await navigator.clipboard.read();
+            if (items.length == 0) {
+                return
+            }
+            console.log(items[0])
+            const imageTypes = items[0].types.filter(type => type.startsWith('image/'));
+
+            if (imageTypes.length > 0) {
+                const file = await items[0].getType(imageTypes[0]);
+                displayImage(file);
+                await recognize(file);
+            }
+        }
         document.addEventListener('paste', handlePaste, false);
+        var pasteBtn = document.getElementById('pasteBtn');
+        pasteBtn.addEventListener('click', handlePasteButton, false);
 
     </script>
 </body>
