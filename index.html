@@ -11,11 +11,9 @@
     <script src='https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js'></script>
     <style>
         #imageBbox {
-            position: absolute;
-            max-width: 100%;
             box-sizing: border-box;
-            /* margin-top: 30px; */
-            /* padding: 20px; */
+            max-width: 100%;
+            display: none;
         }
     </style>
 </head>
@@ -24,7 +22,6 @@
     <div class="container-fluid">
         <div style="margin-top: 10px">
             <canvas id='imageBbox'></canvas>
-            <img id="imagePreview" src="" alt="Image Preview" style="max-height: 50%; max-width: 100%; display: none;">
         </div>
         <div style="margin-top: 10px;" class="input-group">
             <button id="pasteBtn" class="btn btn-warning" type="button">Paste</button>
@@ -38,7 +35,7 @@
         var language = "vie"
         const worker = await Tesseract.createWorker(language, 1);
         var ocrText = document.getElementById("text");
-        var imagePreview = document.getElementById('imagePreview');
+        // var imagePreview = document.getElementById('imagePreview');
         const uploader = document.getElementById('uploader');
         var pasteBtn = document.getElementById('pasteBtn');
         var imageBbox = document.getElementById('imageBbox')
@@ -47,11 +44,27 @@
         function displayImage(file) {
             console.log("Display:", file)
 
+            var imagePreview = new Image();
             const reader = new FileReader();
             reader.onload = function (e) {
                 imagePreview.src = e.target.result;
-                imagePreview.style.display = 'block';
             }
+
+            imagePreview.onload = function (e) {
+                var width = imagePreview.naturalWidth;
+                var height = imagePreview.naturalHeight;
+
+                console.log("WH:", width, height)
+
+
+                imageBbox.width = width;
+                imageBbox.height = height;
+
+                ioctx.drawImage(imagePreview, 0, 0, width, height);
+                imagePreview.style.display = 'none';
+                imageBbox.style.display = 'block';
+            }
+
             reader.readAsDataURL(file);
         }
 
@@ -123,10 +136,6 @@
 
             console.log('result was:', res)
 
-            imageBbox.width = imagePreview.width;
-            imageBbox.height = imagePreview.height;
-
-            console.log(imagePreview, imagePreview.width, imagePreview.height)
             // output_overlay.style.display = 'none'
             // output_text.innerHTML = res.text
 
@@ -143,9 +152,6 @@
                 ioctx.lineTo(w.baseline.x1, w.baseline.y1)
                 ioctx.strokeStyle = 'green'
                 ioctx.stroke()
-
-                console.log(ioctx)
-
                 // octx.font = '20px Times';
                 // octx.font = 20 * (b.x1 - b.x0) / octx.measureText(w.text).width + "px Times";
                 // octx.fillText(w.text, b.x0, w.baseline.y0);
