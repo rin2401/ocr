@@ -17,7 +17,7 @@
             <img id="imagePreview" src="" alt="Image Preview" style="max-height: 50%; max-width: 100%; display: none;">
         </div>
         <div style="margin-top: 10px;" class="input-group">
-            <button id="pasteBtn"  class="btn btn-warning" type="button" >Paste</button>
+            <button id="pasteBtn" class="btn btn-warning" type="button">Paste</button>
             <input type="file" id="uploader" class="form-control" multiple>
         </div>
         <div>
@@ -30,6 +30,20 @@
 
         var div = document.getElementById("text");
 
+        var imagePreview = document.getElementById('imagePreview');
+
+
+        function displayImage(file) {
+            console.log("Display:", file)
+
+            const reader = new FileReader();
+            reader.onload = function (e) {
+                imagePreview.src = e.target.result;
+                imagePreview.style.display = 'block';
+            }
+            reader.readAsDataURL(file);
+            div.innerHTML = "";
+        }
 
         async function recognize(file) {
             console.log(file)
@@ -48,22 +62,7 @@
             await recognize(files[0])
         }
 
-        var imagePreview = document.getElementById('imagePreview');
 
-
-        function displayImage(file) {
-            console.log("Display:", file)
-
-            const reader = new FileReader();
-            reader.onload = function (e) {
-                imagePreview.src = e.target.result;
-                imagePreview.style.display = 'block';
-            }
-            reader.readAsDataURL(file);
-        }
-
-        const uploader = document.getElementById('uploader');
-        uploader.addEventListener('change', handleUpload);
 
 
         async function handlePaste(e) {
@@ -83,7 +82,6 @@
             }
         }
 
-
         async function handlePasteButton(e) {
             const items = await navigator.clipboard.read();
             if (items.length == 0) {
@@ -98,10 +96,12 @@
                 await recognize(file);
             }
         }
+
+        const uploader = document.getElementById('uploader');
+        uploader.addEventListener('change', handleUpload);
         document.addEventListener('paste', handlePaste, false);
         var pasteBtn = document.getElementById('pasteBtn');
         pasteBtn.addEventListener('click', handlePasteButton, false);
-
     </script>
 </body>
 
